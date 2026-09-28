@@ -17,22 +17,26 @@ test.describe('Конструктор бургера — добавление и
   });
 
   test('добавление булки в конструктор', async ({ page }) => {
+    const constructor = page.getByTestId('constructor')
     const bunCard = page.locator('li', { hasText: 'Тестовая булка' });
+    
+
+    await expect(constructor.getByText('Тестовая булка (верх)')).toHaveCount(0);
+    await expect(constructor.getByText('Тестовая булка (низ)')).toHaveCount(0);
     await bunCard.getByText('Добавить').click();
 
-    await expect(page.getByText('Тестовая булка (верх)')).toBeVisible();
-    await expect(page.getByText('Тестовая булка (низ)')).toBeVisible();
+    await expect(constructor.getByText('Тестовая булка (верх)')).toBeVisible();
+    await expect (constructor.getByText('Тестовая булка (низ)')).toBeVisible();
+
   });
 
   test('добавление начинки в конструктор', async ({ page }) => {
+    const constructor = page.getByTestId('constructor')
     const mainCard = page.locator('li', { hasText: 'Тестовая начинка' });
-    await mainCard.getByText('Добавить').click();
 
-    await expect(
-      page.locator('[class*="constructor-element__text"]', {
-        hasText: 'Тестовая начинка'
-      })
-    ).toBeVisible();
+    await expect(constructor.getByText('Тестовая начинка')).toHaveCount(0)
+    await mainCard.getByText('Добавить').click();
+    await expect(constructor.getByText('Тестовая начинка')).toBeVisible()
   });
 });
 
@@ -46,8 +50,9 @@ test.describe('Конструктор бургера — модальные ок
     page
   }) => {
     // Клик по булке — модалка должна показать данные булки
-    await page.getByText('Тестовая булка').click();
     const modal = page.locator('#modals');
+    await expect(modal.getByText('Детали ингредиента')).toHaveCount(0);
+    await page.getByText('Тестовая булка').click();
     await expect(modal.getByText('Детали ингредиента')).toBeVisible();
     await expect(
       modal.getByRole('heading', { name: 'Тестовая булка' })
@@ -59,7 +64,7 @@ test.describe('Конструктор бургера — модальные ок
     // Закрываем и кликаем по другому ингредиенту — начинке
     await page.locator('#modals button').click();
     await expect(modal.getByText('Детали ингредиента')).not.toBeVisible();
-
+    await expect(modal.getByText('Детали ингредиента')).toHaveCount(0);
     await page.getByText('Тестовая начинка').click();
     await expect(modal.getByText('Детали ингредиента')).toBeVisible();
     await expect(
@@ -114,24 +119,32 @@ test.describe('Конструктор бургера — оформление з
     await expect(page.getByText('Тестовая булка')).toBeVisible();
 
     await expect(page.getByText('Тестовый Пользователь')).toBeVisible();
-
+    const constructor = page.getByTestId('constructor');
+    const modal = page.locator('#modals');
     const bunCard = page.locator('li', { hasText: 'Тестовая булка' });
-    await bunCard.getByText('Добавить').click();
 
+    await bunCard.getByText('Добавить').click();
     const mainCard = page.locator('li', { hasText: 'Тестовая начинка' });
     await mainCard.getByText('Добавить').click();
 
+    
+
+    await expect(constructor.getByText('Тестовая булка (верх)')).toBeVisible()
+    await expect(constructor.getByText('Тестовая булка (низ)')).toBeVisible();
+    await expect(constructor.getByText('Тестовая начинка')).toBeVisible();
+
+    await expect(modal.getByText('идентификатор заказа')).toHaveCount(0);
+
     await page.getByRole('button', { name: 'Оформить заказ' }).click();
 
-    const modal = page.locator('#modals');
     await expect(modal.getByText('идентификатор заказа')).toBeVisible();
     await expect(modal.getByText('12345')).toBeVisible();
 
     await page.locator('#modals button').click();
     await expect(modal.getByText('идентификатор заказа')).not.toBeVisible();
 
-    await expect(page.getByText('Выберите булки').first()).toBeVisible();
-    await expect(page.getByText('Выберите начинку')).toBeVisible();
+    await expect(constructor.getByText('Выберите булки').first()).toBeVisible();
+    await expect(constructor.getByText('Выберите начинку')).toBeVisible();
 
     await context.clearCookies();
     await page.evaluate(() => window.localStorage.removeItem('refreshToken'));

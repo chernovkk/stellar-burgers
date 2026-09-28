@@ -58,15 +58,16 @@ describe('тесты редьюсера constructorSlice', () => {
   });
 
   test('removeIngredient — удаляет начинку по id', () => {
-    const stateWithIngredient = {
+    const ingredient1 = { ...mockMain, id: 'id-1' };
+    const ingredient2 = { ...mockMain, id: 'id-2' };
+
+    const stateWithTwo = {
       ...initialState,
-      ingredients: [{ ...mockMain, id: 'test-uuid' }]
+      ingredients: [ingredient1,ingredient2]
     };
-    const state = constructorReducer(
-      stateWithIngredient,
-      removeIngredient('test-uuid')
-    );
-    expect(state.ingredients).toHaveLength(0);
+    const state = constructorReducer(stateWithTwo, removeIngredient('id-1'));
+    expect(state.ingredients).toHaveLength(1);
+    expect(state.ingredients[0].id).toBe('id-2');
   });
 
   test('moveIngredient — меняет порядок начинок местами', () => {
